@@ -54,12 +54,13 @@ public class GeoquestApiFetcher {
     private boolean initialize = false;
 
     private ArrayNode questMapping;
-    
+
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("YYYY-MM-dd");
 
     private static Logger LOG = LoggerFactory.getLogger(GeoquestApiFetcher.class);
 
-    public GeoquestApiFetcher(GeoquestSubmissionsRepository dataRepository, GeoquestUtils utils, Environment environment) {
+    public GeoquestApiFetcher(GeoquestSubmissionsRepository dataRepository, GeoquestUtils utils,
+            Environment environment) {
 
         this.mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -121,7 +122,7 @@ public class GeoquestApiFetcher {
             LOG.info(String.format("Starting ScheduledExecutorService with initialDelay: %d and period: %d.",
                     initialDelay, period));
         }
-//        ses.scheduleAtFixedRate(runnableTask, initialDelay, period, TimeUnit.SECONDS);
+         ses.scheduleAtFixedRate(runnableTask, initialDelay, period, TimeUnit.SECONDS);
 
         Runnable updateRunnableTask = () -> {
             try {
@@ -134,7 +135,7 @@ public class GeoquestApiFetcher {
         if (LOG.isInfoEnabled()) {
             LOG.info(String.format("Starting update task with initialDelay: %d and period: 5 hours.", initialDelay));
         }
-        ses.scheduleAtFixedRate(updateRunnableTask, 1, 5, TimeUnit.HOURS);
+//        ses.scheduleAtFixedRate(updateRunnableTask, 1, 5, TimeUnit.HOURS);
     }
 
     private void checkForUpdates() throws Exception {
@@ -150,9 +151,9 @@ public class GeoquestApiFetcher {
         for (JsonNode jsonNode : questMapping) {
             try {
                 String name = jsonNode.get("name").asText();
-                String id = jsonNode.get("quest_id").asText(); 
+                String id = jsonNode.get("quest_id").asText();
                 utils.getSubmissions(UUID.fromString(id));
-                LOG.info("Fetched output for " + name);                
+                LOG.info("Fetched output for " + name);
             } catch (Exception e) {
                 LOG.error(e.getMessage());
             }

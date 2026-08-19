@@ -1,15 +1,20 @@
 package org.n52.project.enforce.geoquest.api.impl.geoquest;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.locationtech.jts.geom.Point;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
@@ -88,6 +93,15 @@ public class GeoquestSubmissions {
             name = "coordinate",
             columnDefinition = "geometry(Point,4326)")
     private Point coordinate;
+    
+    @ElementCollection
+    @JoinTable(
+            name = "geoquest_submissions_images",
+            joinColumns = @JoinColumn(
+                    name = "submissions_id"))
+    @Column(
+            name = "images")
+    private Set<GeoquestImages> images = new HashSet<GeoquestImages>();
 
     public GeoquestSubmissions() {
     }
@@ -215,6 +229,14 @@ public class GeoquestSubmissions {
 
     public void setReportType(String reportType) {
         this.reportType = reportType;
+    }
+
+    public Set<GeoquestImages> getImages() {
+        return images;
+    }
+
+    public void setImages(Set<GeoquestImages> images) {
+        this.images = images;
     }
 
     @Override

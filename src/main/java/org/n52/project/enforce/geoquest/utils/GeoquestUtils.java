@@ -8,8 +8,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -17,6 +19,9 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.WKTReader;
+import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestImages;
+import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestImagesPK;
+import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestImagesRepository;
 import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestSubmissions;
 import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestSubmissionsRepository;
 import org.n52.project.enforce.geoquest.remote.ApiClient;
@@ -41,6 +46,8 @@ public class GeoquestUtils {
 
     private GeoquestSubmissionsRepository geoquestSubmissionsRepository;
 
+    private GeoquestImagesRepository geoquestImagesRepository;
+
     private WKTReader wktReader;
 
     private ObjectMapper objectMapper;
@@ -61,8 +68,10 @@ public class GeoquestUtils {
 
     private static Logger LOG = LoggerFactory.getLogger(GeoquestUtils.class);
 
-    public GeoquestUtils(GeoquestSubmissionsRepository cs1DataRepository, Environment environment) {
-        this.geoquestSubmissionsRepository = cs1DataRepository;
+    public GeoquestUtils(GeoquestSubmissionsRepository geoquestSubmissionsRepository,
+            GeoquestImagesRepository geoquestImagesRepository, Environment environment) {
+        this.geoquestSubmissionsRepository = geoquestSubmissionsRepository;
+        this.geoquestImagesRepository = geoquestImagesRepository;
         wktReader = new WKTReader(geometryFactory);
         objectMapper = new ObjectMapper();
         apiClient = new ApiClient();
@@ -130,7 +139,8 @@ public class GeoquestUtils {
         return data;
     }
 
-    private GeoquestSubmissions createSubmissions(UUID questId, IIASAGeoQuestQuestQuestSurveySubmissionDto input) {
+    private GeoquestSubmissions createSubmissions(UUID questId,
+            IIASAGeoQuestQuestQuestSurveySubmissionDto input) {
 
         GeoquestSubmissions data = new GeoquestSubmissions();
         UUID submissionId = input.getId();
@@ -153,8 +163,8 @@ public class GeoquestUtils {
         if (reportType instanceof ArrayNode) {
             data.setReportType(((ArrayNode) reportType).elements().next().asText());
         } else {
-            if(reportType != null) {
-                data.setReportType(reportType.asText());                
+            if (reportType != null) {
+                data.setReportType(reportType.asText());
             }
         }
         data.setAssignedScore(input.getAssignedScore());
@@ -168,29 +178,40 @@ public class GeoquestUtils {
         int imageCount = input.getImageCount();
 
         if (imageCount > 0) {
-            setImageUrls(data, questId, submissionId);
+            try {
+                setImageUrls(data, questId, submissionId);
+            } catch (ApiException e) {
+                LOG.error("Could not set images for submission: " + submissionId);
+                LOG.error(e.getMessage());
+            }
         }
-
         data.setImageCount(imageCount);
-
         data = geoquestSubmissionsRepository.saveAndFlush(data);
         LOG.info("Added submission with query id: " + data.getQuestSurveySubmissionId());
         return data;
     }
 
-    private boolean setImageUrls(GeoquestSubmissions data,
+    private void setImageUrls(GeoquestSubmissions data,
             UUID questId,
-            UUID submissionId) {
-        boolean result = false;
-        try {
-            List<IIASAGeoQuestQuestImageDto> submissionImages =
-                    questSurveySubmissionApi.apiQuestsQuestIdSubmissionSubmissionIdImagesGet(questId, submissionId);
-            submissionImages.get(0).getUrl();
-        } catch (ApiException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            UUID submissionId) throws ApiException {
+        Set<GeoquestImages> geoquestImages = new HashSet<>();
+        List<IIASAGeoQuestQuestImageDto> submissionImages =
+                questSurveySubmissionApi.apiQuestsQuestIdSubmissionSubmissionIdImagesGet(questId, submissionId);
+        for (IIASAGeoQuestQuestImageDto iiasaGeoQuestQuestImageDto : submissionImages) {
+            GeoquestImages geoquestImage = new GeoquestImages();
+            geoquestImage.setGeoquestImagesPK(new GeoquestImagesPK(iiasaGeoQuestQuestImageDto.getId(),
+                    iiasaGeoQuestQuestImageDto.getQuestSurveySubmissionId()));
+            geoquestImage.setBase64Data(iiasaGeoQuestQuestImageDto.getBase64Data());
+            geoquestImage.setUrl(iiasaGeoQuestQuestImageDto.getUrl());
+            geoquestImage.setCreationTime(iiasaGeoQuestQuestImageDto.getCreationTime());
+            geoquestImage.setCreatorId(iiasaGeoQuestQuestImageDto.getCreatorId());
+            geoquestImage.setLastModificationTime(iiasaGeoQuestQuestImageDto.getLastModificationTime());
+            geoquestImage.setLastModifierId(iiasaGeoQuestQuestImageDto.getLastModifierId());
+            geoquestImages.add(geoquestImage);
+            geoquestImagesRepository.saveAndFlush(geoquestImage);
         }
-        return result;
+        data.setImages(geoquestImages);
+
     }
 
     private Point createPoint(List<IIASAGeoQuestQuestCoordinate> location) {

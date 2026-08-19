@@ -24,7 +24,36 @@ CREATE SEQUENCE IF NOT EXISTS public.geoquest_submissions_seq
     MINVALUE 1
     MAXVALUE 10000
     CACHE 1;
-    
+
+CREATE TABLE IF NOT EXISTS public.geoquest_images
+(
+    id int NOT NULL,
+    quest_survey_submission_id uuid NOT NULL,
+    creator_id uuid,
+    last_modifier_id uuid,
+    base_64_data character varying(4096),
+    url character varying(512),
+    creation_time timestamp with time zone,
+    last_modification_time timestamp with time zone,
+    CONSTRAINT geoquest_images_pkey PRIMARY KEY (id, quest_survey_submission_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.geoquest_submissions_images
+(
+    submissions_id int NOT NULL,
+    images_id int NOT NULL,
+    images_quest_survey_submission_id uuid NOT NULL,    
+    CONSTRAINT geoquest_submissions_images_pkey PRIMARY KEY (submissions_id, images_id, images_quest_survey_submission_id),
+    CONSTRAINT submissions_fkey FOREIGN KEY (submissions_id)
+        REFERENCES public.geoquest_submissions (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT images_id_fkey FOREIGN KEY (images_id, images_quest_survey_submission_id)
+        REFERENCES public.geoquest_images(id, quest_survey_submission_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
 CREATE OR REPLACE FUNCTION ST_CS6DataToGeoJson()
 RETURNS jsonb AS
 $BODY$
