@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestApiFetcher;
 import org.n52.project.enforce.geoquest.remote.ApiException;
 import org.n52.project.enforce.geoquest.utils.GeoquestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,14 @@ public class GeoquestUtilsTest extends DBTest{
     @Autowired
     GeoquestUtils geoquestUtils;
     
+    @Autowired
+    GeoquestApiFetcher geoquestApiFetcher;
+    
     @Test
     void testFetchApi() {
         try {
-            geoquestUtils.getSubmissions(UUID.fromString("3a1cacf7-c7a0-de86-e915-7c1e3b25f5cf"));
-        } catch (ApiException e) {
+            geoquestApiFetcher.fetchAndStoreData();
+        } catch (Exception e) {
             fail(e.getMessage());
         }
     }

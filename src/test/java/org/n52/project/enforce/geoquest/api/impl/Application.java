@@ -14,7 +14,7 @@ import org.springframework.boot.persistence.autoconfigure.EntityScan;
  */
 @SpringBootApplication
 @EntityScan(basePackages = {
-"org.n52.project.enforce.geoquest.api.impl*"})
+"org.n52.project.enforce.geoquest.api.impl.geoquest*"})
 public class Application {
 
     /**

@@ -1,5 +1,6 @@
 package org.n52.project.enforce.geoquest.api.impl;
 
+import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestApiFetcher;
 import org.n52.project.enforce.geoquest.utils.GeoquestUtils;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
@@ -16,7 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureTestDatabase(
         replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = Application.class)
-@ComponentScan(basePackageClasses = { GeoquestUtils.class})
+@ComponentScan(basePackageClasses = { GeoquestUtils.class, GeoquestApiFetcher.class})
 public abstract class DBTest {
 
     static JdbcDatabaseContainer<?> database = new PostgisContainerProvider().newInstance()

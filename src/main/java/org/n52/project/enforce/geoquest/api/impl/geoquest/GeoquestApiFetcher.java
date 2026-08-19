@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Iterator;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,15 +29,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Component
 @ConfigurationProperties
-public class GeoQuestApiFetcher {
+public class GeoquestApiFetcher {
 
     private URL outputDataUrl;
 
@@ -50,20 +53,26 @@ public class GeoQuestApiFetcher {
 
     private boolean initialize = false;
 
-    private String dataDir;
-
+    private ArrayNode questMapping;
+    
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("YYYY-MM-dd");
 
-    private static Logger LOG = LoggerFactory.getLogger(GeoQuestApiFetcher.class);
+    private static Logger LOG = LoggerFactory.getLogger(GeoquestApiFetcher.class);
 
-    public GeoQuestApiFetcher(GeoquestSubmissionsRepository dataRepository, GeoquestUtils utils, Environment environment) {
+    public GeoquestApiFetcher(GeoquestSubmissionsRepository dataRepository, GeoquestUtils utils, Environment environment) {
 
         this.mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         this.utils = utils;
         urlSpec = environment.getProperty("geoquest.url.spec");
         initialize = Boolean.parseBoolean(environment.getProperty("geoquest.db.initialize"));
-        dataDir = environment.getProperty("data.dir");
+        String questMappingString = environment.getProperty("geoquest.quests.mapping");
+        try {
+            questMapping = (ArrayNode) mapper.readTree(questMappingString);
+        } catch (JsonProcessingException e) {
+            LOG.error(e.getMessage());
+            return;
+        }
         try {
             updateUrl = new URI(String.format(environment.getProperty("geoquest.update.url.spec"),
                     dateTimeFormatter.format(OffsetDateTime.now()))).toURL();
@@ -112,7 +121,7 @@ public class GeoQuestApiFetcher {
             LOG.info(String.format("Starting ScheduledExecutorService with initialDelay: %d and period: %d.",
                     initialDelay, period));
         }
-        ses.scheduleAtFixedRate(runnableTask, initialDelay, period, TimeUnit.SECONDS);
+//        ses.scheduleAtFixedRate(runnableTask, initialDelay, period, TimeUnit.SECONDS);
 
         Runnable updateRunnableTask = () -> {
             try {
@@ -130,88 +139,24 @@ public class GeoQuestApiFetcher {
 
     private void checkForUpdates() throws Exception {
         utils.getSubmissions(UUID.fromString("3a1cacf7-c7a0-de86-e915-7c1e3b25f5cf"));
-//        UUID uuid = UUID.randomUUID();
-//        File dataDirectory = new File(dataDir + "/" + System.currentTimeMillis());
-//        dataDirectory.mkdir();
-//        File file = new File(dataDirectory.getAbsolutePath() + "/" + uuid);
-//        try (BufferedInputStream in = new BufferedInputStream(updateUrl.openStream());
-//                FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-//            byte dataBuffer[] = new byte[1024];
-//            int bytesRead;
-//            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-//                fileOutputStream.write(dataBuffer, 0, bytesRead);
-//            }
-//        } catch (IOException e) {
-//            // handle exception
-//        }
-//        byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
-//        byte[] hash = MessageDigest.getInstance("MD5").digest(data);
-//        String checksum = new BigInteger(1, hash).toString(16);
-//        LOG.debug(checksum);
-//        JsonNode node = mapper.readTree(file);
         LOG.info("Fetched output.");
-        
-//        if (node instanceof ObjectNode) {
-//            ObjectNode objectNode = (ObjectNode) node;
-//            JsonNode results = objectNode.path("results");
-//            if (results instanceof ArrayNode) {
-//                ArrayNode resultsArray = (ArrayNode) results;
-//                for (JsonNode jsonNode : resultsArray) {
-//                    UUID id = utils.getId(jsonNode);
-//                    if (utils.ckeckIdIsInDb(id)) {
-//                        mapper.writer().writeValue(new File(dataDirectory.getAbsolutePath() + "/" + id), jsonNode);
-//                        utils.updateData(jsonNode);
-//                    }
-//                }
-//            }
-//        }
-
     }
 
-    private void fetchAndStoreData() throws Exception {
+    public void fetchAndStoreData() throws Exception {
         fetchAndStoreData(outputDataUrl);
     }
 
     private void fetchAndStoreData(URL url) throws Exception {
-        utils.getSubmissions(UUID.fromString("3a1cacf7-c7a0-de86-e915-7c1e3b25f5cf"));
-//        UUID uuid = UUID.randomUUID();
-//        File dataDirectory = new File(dataDir + "/" + System.currentTimeMillis());
-//        dataDirectory.mkdir();
-//        File file = new File(dataDirectory.getAbsolutePath() + "/" + uuid);
-//        try (BufferedInputStream in = new BufferedInputStream(url.openStream());
-//                FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-//            byte dataBuffer[] = new byte[1024];
-//            int bytesRead;
-//            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-//                fileOutputStream.write(dataBuffer, 0, bytesRead);
-//            }
-//        } catch (IOException e) {
-//            // handle exception
-//        }
-//        byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
-//        byte[] hash = MessageDigest.getInstance("MD5").digest(data);
-//        String checksum = new BigInteger(1, hash).toString(16);
-//        LOG.debug(checksum);
-//        JsonNode node = mapper.readTree(file);
-//        utils.readJsonNode(node);
-        LOG.info("Fetched output.");
-//        if (node instanceof ObjectNode) {
-//            ObjectNode objectNode = (ObjectNode) node;
-//            JsonNode results = objectNode.path("results");
-//            if (results instanceof ArrayNode) {
-//                ArrayNode resultsArray = (ArrayNode) results;
-//                for (JsonNode jsonNode : resultsArray) {
-//                    UUID id = utils.getId(jsonNode);
-//                    if (utils.ckeckIdIsInDb(id)) {
-//                        LOG.info(String.format("Data with id %s already exists in database.", id.toString()));
-//                        continue;
-//                    }
-//                    mapper.writer().writeValue(new File(dataDirectory.getAbsolutePath() + "/" + id), jsonNode);
-//                    utils.createNewData(jsonNode);
-//                    LOG.info("New Data was created.");
-//                }
-//            }
-//        }
+        for (JsonNode jsonNode : questMapping) {
+            try {
+                String name = jsonNode.get("name").asText();
+                String id = jsonNode.get("quest_id").asText(); 
+                utils.getSubmissions(UUID.fromString(id));
+                LOG.info("Fetched output for " + name);                
+            } catch (Exception e) {
+                LOG.error(e.getMessage());
+            }
+        }
 
     }
 
