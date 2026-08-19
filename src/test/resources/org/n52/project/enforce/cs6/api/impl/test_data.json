@@ -1,0 +1,43 @@
+{
+  "totalRows": 33,
+  "submissions": [
+    {
+      "submissionData": "{\"selectType\": [\"1_illegalFire\"], \"questStartTime\": \"2025/06/25 16:23:31.000000\", \"sourceLocation\": \"15.99776;108.0598\", \"headingAccuracy\": 1, \"dateSurveyCreation\": \"2025-06-25 04:24:06.000000\", \"horizontalAccuracy\": 3.6, \"userPositionSurveyCreatedLat\": 15.98895, \"userPositionSurveyCreatedLng\": 108.08, \"userPositionSurveyStartedLat\": 15.98898, \"userPositionSurveyStartedLng\": 108.08}",
+      "location": [
+        {
+          "yLat": 15.99776,
+          "xLng": 108.0598
+        }
+      ],
+      "locationId": null,
+      "imageCount": 0,
+      "userName": "xyz",
+      "status": "Accepted",
+      "assignedScore": null,
+      "lastModificationTime": "2026-07-13T14:49:09.885071",
+      "lastModifierId": null,
+      "creationTime": "2025-06-25T09:24:13.209945",
+      "creatorId": "3a1ab883-b783-183e-2359-ce15ed895e91",
+      "id": "3a1ab893-c71a-eb60-57b1-c2f43f8bcfe3"
+    },
+    {
+      "submissionData": "{\"selectType\": [\"1_illegalFire\"], \"questStartTime\": \"2025/07/07 08:20:08.000000\", \"sourceLocation\": \"48.18198;16.34743\", \"headingAccuracy\": 10, \"dateSurveyCreation\": \"2025-07-07 08:21:55.000000\", \"horizontalAccuracy\": 4.729584, \"userPositionSurveyCreatedLat\": 48.17987, \"userPositionSurveyCreatedLng\": 16.35532, \"userPositionSurveyStartedLat\": 48.18197, \"userPositionSurveyStartedLng\": 16.3472}",
+      "location": [
+        {
+          "yLat": 48.18198,
+          "xLng": 16.34743
+        }
+      ],
+      "locationId": null,
+      "imageCount": 2,
+      "userName": "gsg33",
+      "status": "NotReviewed",
+      "assignedScore": null,
+      "lastModificationTime": null,
+      "lastModifierId": null,
+      "creationTime": "2025-07-07T06:24:23.675518",
+      "creatorId": "3a1af5bb-4e95-6ffe-02d5-71ed04611b5f",
+      "id": "3a1af5bb-747c-0d29-59a1-800c8c04eee0"
+    }
+  ]
+}
