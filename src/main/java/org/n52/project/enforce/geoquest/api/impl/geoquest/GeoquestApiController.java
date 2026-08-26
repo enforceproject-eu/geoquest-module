@@ -1,8 +1,7 @@
 package org.n52.project.enforce.geoquest.api.impl.geoquest;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.Serializable;
+import java.util.UUID;
 
 import org.n52.project.enforce.geoquest.api.GeoquestApi;
 import org.n52.project.enforce.geoquest.utils.GeoquestUtils;
@@ -39,9 +38,9 @@ public class GeoquestApiController implements GeoquestApi {
     }
 
     @Override
-    public ResponseEntity<Serializable> getGeoquestGeoQuestData() {
+    public ResponseEntity<Serializable> getGeoquestGeoQuestData(UUID questId) {
         try {
-            return ResponseEntity.ok(geoquestDataRepository.getGeoJson());
+            return ResponseEntity.ok(geoquestDataRepository.getGeoJson(questId));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }

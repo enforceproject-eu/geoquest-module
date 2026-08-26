@@ -10,6 +10,7 @@ import org.locationtech.jts.geom.Point;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,7 +45,7 @@ public class GeoquestSubmissions {
     @Column(
             name = "quest_survey_Submission_id")
     private UUID questSurveySubmissionId;
-
+    
     @Column(
             name = "creator_id")
     private UUID creatorId;
@@ -110,6 +111,16 @@ public class GeoquestSubmissions {
     @Column(
             name = "images")
     private Set<GeoquestImages> images = new HashSet<GeoquestImages>();
+    
+//    @JoinTable(
+//            name = "geoquest_quests_submissions",
+//            joinColumns = {@JoinColumn(
+//                    name = "submission_id"), @JoinColumn(
+//                            name = "quest_survey_Submission_id")})
+    @Column(
+            name = "quest_id")
+    private UUID questId;
+
 
     public GeoquestSubmissions() {
     }
@@ -261,6 +272,14 @@ public class GeoquestSubmissions {
 
     public void setDerives(Integer derives) {
         this.derives = derives;
+    }
+
+    public UUID getQuestId() {
+        return questId;
+    }
+
+    public void setQuestId(UUID questId) {
+        this.questId = questId;
     }
 
     @Override

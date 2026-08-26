@@ -28,6 +28,6 @@ public interface GeoquestSubmissionsRepository extends JpaRepository<GeoquestSub
      * 
      * @return a {@link String} object
      */
-    @Query("select ST_CS2DataToGeoJson()")
-    String getGeoJson();
+    @Query("select ST_CSGeoquestDataToGeoJson(:questId)")
+    String getGeoJson(@Param("questId") UUID questId);
 }

@@ -122,7 +122,7 @@ public class GeoquestApiFetcher {
             LOG.info(String.format("Starting ScheduledExecutorService with initialDelay: %d and period: %d.",
                     initialDelay, period));
         }
-         ses.scheduleAtFixedRate(runnableTask, initialDelay, period, TimeUnit.SECONDS);
+//         ses.scheduleAtFixedRate(runnableTask, initialDelay, period, TimeUnit.SECONDS);
 
         Runnable updateRunnableTask = () -> {
             try {
@@ -138,16 +138,12 @@ public class GeoquestApiFetcher {
 //        ses.scheduleAtFixedRate(updateRunnableTask, 1, 5, TimeUnit.HOURS);
     }
 
-    private void checkForUpdates() throws Exception {
+    public void checkForUpdates() throws Exception {
         for (JsonNode jsonNode : questMapping) {
-            try {
-                String name = jsonNode.get("name").asText();
-                String id = jsonNode.get("quest_id").asText();
-                utils.getUpdates(UUID.fromString(id));
-                LOG.info("Fetched output for " + name);
-            } catch (Exception e) {
-                LOG.error(e.getMessage());
-            }
+            String name = jsonNode.get("name").asText();
+            String id = jsonNode.get("quest_id").asText();
+            utils.getUpdates(UUID.fromString(id));
+            LOG.info("Fetched output for " + name);
         }
         LOG.info("Fetched output.");
     }

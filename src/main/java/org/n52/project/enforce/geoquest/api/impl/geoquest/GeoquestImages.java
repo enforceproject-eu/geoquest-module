@@ -4,8 +4,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
@@ -13,8 +16,23 @@ import jakarta.persistence.Table;
         name = "geoquest_images")
 public class GeoquestImages {
 
-    @EmbeddedId
-    private GeoquestImagesPK geoquestImagesPK;
+    @Id
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "geoquest_images_generator")
+    @SequenceGenerator(
+            name = "geoquest_images_generator",
+            sequenceName = "geoquest_images_seq",
+            allocationSize = 1)
+    private Integer id;
+
+    @Column(
+            name = "image_id")
+    private Long imageId;
+
+    @Column(
+            name = "quest_survey_Submission_id")
+    private UUID questSurveySubmissionId;    
 
     @Column(
             name = "creator_id")
@@ -39,12 +57,21 @@ public class GeoquestImages {
     @Column(
             name = "base_64_data")
     private String base64Data;
+    
+    @Column(
+            name = "derived_by")
+    private Integer derivedBy;
+    
+    @Column(
+            name = "derives")
+    private Integer derives;
 
     public GeoquestImages() {}
     
-    public GeoquestImages(GeoquestImagesPK geoquestImagesPK, UUID creatorId, UUID lastModifierId,
+    public GeoquestImages(int id, Long imageId, UUID creatorId, UUID lastModifierId,
             LocalDateTime creationTime, LocalDateTime lastModificationTime, String url, String base64Data) {
-        this.geoquestImagesPK = geoquestImagesPK;
+        this.id = id;
+        this.imageId = imageId;
         this.creatorId = creatorId;
         this.lastModifierId = lastModifierId;
         this.creationTime = creationTime;
@@ -53,12 +80,28 @@ public class GeoquestImages {
         this.base64Data = base64Data;
     }
 
-    public GeoquestImagesPK getGeoquestImagesPK() {
-        return geoquestImagesPK;
+    public Integer getId() {
+        return id;
     }
 
-    public void setGeoquestImagesPK(GeoquestImagesPK geoquestImagesPK) {
-        this.geoquestImagesPK = geoquestImagesPK;
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(Long imageId) {
+        this.imageId = imageId;
+    }
+
+    public UUID getQuestSurveySubmissionId() {
+        return questSurveySubmissionId;
+    }
+
+    public void setQuestSurveySubmissionId(UUID questSurveySubmissionId) {
+        this.questSurveySubmissionId = questSurveySubmissionId;
     }
 
     public UUID getCreatorId() {
@@ -107,6 +150,22 @@ public class GeoquestImages {
 
     public void setBase64Data(String base64Data) {
         this.base64Data = base64Data;
+    }
+
+    public Integer getDerivedBy() {
+        return derivedBy;
+    }
+
+    public void setDerivedBy(Integer derivedBy) {
+        this.derivedBy = derivedBy;
+    }
+
+    public Integer getDerives() {
+        return derives;
+    }
+
+    public void setDerives(Integer derives) {
+        this.derives = derives;
     }
 
 }

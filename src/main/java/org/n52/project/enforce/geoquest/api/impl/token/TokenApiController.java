@@ -1,7 +1,9 @@
 package org.n52.project.enforce.geoquest.api.impl.token;
 
 import org.n52.project.enforce.geoquest.api.TokenApi;
+import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestApiFetcher;
 import org.n52.project.enforce.geoquest.model.TokenPostRequest;
+import org.n52.project.enforce.geoquest.utils.GeoquestUtils;
 import org.n52.project.enforce.geoquest.utils.Token;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,9 +17,24 @@ import jakarta.validation.Valid;
 @RequestMapping("${openapi.eNFORCEDataAccess.base-path:}")
 public class TokenApiController implements TokenApi {
 
+    private GeoquestApiFetcher geoquestApiFetcher;
+    
+    private GeoquestUtils geoquestUtils;
+    
+    public TokenApiController(GeoquestApiFetcher geoquestApiFetcher, GeoquestUtils geoquestUtils) {
+        this.geoquestApiFetcher = geoquestApiFetcher;
+        this.geoquestUtils = geoquestUtils;
+    }
+    
     @Override
-    public ResponseEntity<?> addGeoquestGeoQuestTokenAsBody(@Valid TokenPostRequest tokenPostRequest) {                       
-        Token.setToken(tokenPostRequest.getToken());        
+    public ResponseEntity<?> addGeoquestGeoQuestTokenAsBody(@Valid TokenPostRequest tokenPostRequest) {
+        Token.setToken(tokenPostRequest.getToken());
+        geoquestUtils.getApiClient().setAccessToken(Token.getToken());
+        try {
+            geoquestApiFetcher.checkForUpdates();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
         return ResponseEntity.ok().build();
     }
 

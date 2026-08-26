@@ -331,6 +331,7 @@
 									<!-- target to generate java server code -->
                                     <generatorName>spring</generatorName>
                                     <output>${project.basedir}</output>
+                                    <apiPackage>org.n52.project.enforce.geoquest.api</apiPackage>
                                     <modelPackage>org.n52.project.enforce.geoquest.model</modelPackage>
                                     <generateModels>true</generateModels>
                                     <generateApis>false</generateApis>
@@ -387,6 +388,7 @@
                                     <generatorName>spring</generatorName>
                                     <output>${project.basedir}</output>
                                     <apiPackage>org.n52.project.enforce.geoquest.api</apiPackage>
+                                    <modelPackage>org.n52.project.enforce.geoquest.model</modelPackage>
                                     <generateModels>false</generateModels>
                                     <generateApis>true</generateApis>
 

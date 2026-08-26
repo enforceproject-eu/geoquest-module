@@ -1,3 +1,15 @@
+CREATE TABLE IF NOT EXISTS public.geoquest_quests
+(
+    id uuid NOT NULL,
+    name character varying(255),
+    case_study_number int,
+    CONSTRAINT geoquest_quests_pkey PRIMARY KEY (id)
+);
+    
+INSERT INTO public.geoquest_quests VALUES ('3a1e334a-373a-cd28-212d-699f7ab32153', 'ENFORCE Valle Galeria', 1);
+INSERT INTO public.geoquest_quests VALUES ('3a1a76af-c26e-5eb9-8af0-f79302af9ccc', 'ENFORCE Puglia', 6);
+INSERT INTO public.geoquest_quests VALUES ('3a1cacf7-c7a0-de86-e915-7c1e3b25f5cf', 'ENFORCE Forests', 2);
+    
 CREATE TABLE IF NOT EXISTS public.geoquest_submissions
 (
     id int NOT NULL,
@@ -17,7 +29,12 @@ CREATE TABLE IF NOT EXISTS public.geoquest_submissions
     image_count int,
     derived_by int,
     derives int,
-    CONSTRAINT geoquest_submissions_pkey PRIMARY KEY (id)
+    quest_id uuid NOT NULL,
+    CONSTRAINT geoquest_submissions_pkey PRIMARY KEY (id),
+    CONSTRAINT quest_id_fkey FOREIGN KEY (quest_id)
+        REFERENCES public.geoquest_quests(id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
 );
 
 CREATE SEQUENCE IF NOT EXISTS public.geoquest_submissions_seq
@@ -30,6 +47,7 @@ CREATE SEQUENCE IF NOT EXISTS public.geoquest_submissions_seq
 CREATE TABLE IF NOT EXISTS public.geoquest_images
 (
     id int NOT NULL,
+    image_id int NOT NULL,
     quest_survey_submission_id uuid NOT NULL,
     creator_id uuid,
     last_modifier_id uuid,
@@ -37,26 +55,34 @@ CREATE TABLE IF NOT EXISTS public.geoquest_images
     url character varying(512),
     creation_time timestamp with time zone,
     last_modification_time timestamp with time zone,
-    CONSTRAINT geoquest_images_pkey PRIMARY KEY (id, quest_survey_submission_id)
+    derived_by int,
+    derives int,
+    CONSTRAINT geoquest_images_pkey PRIMARY KEY (id)
 );
+
+CREATE SEQUENCE IF NOT EXISTS public.geoquest_images_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 10000
+    CACHE 1;
 
 CREATE TABLE IF NOT EXISTS public.geoquest_submissions_images
 (
     submissions_id int NOT NULL,
-    images_id int NOT NULL,
-    images_quest_survey_submission_id uuid NOT NULL,    
-    CONSTRAINT geoquest_submissions_images_pkey PRIMARY KEY (submissions_id, images_id, images_quest_survey_submission_id),
+    images_id int NOT NULL,  
+    CONSTRAINT geoquest_submissions_images_pkey PRIMARY KEY (submissions_id, images_id),
     CONSTRAINT submissions_fkey FOREIGN KEY (submissions_id)
-        REFERENCES public.geoquest_submissions (id) MATCH SIMPLE
+        REFERENCES public.geoquest_submissions(id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
-    CONSTRAINT images_id_fkey FOREIGN KEY (images_id, images_quest_survey_submission_id)
-        REFERENCES public.geoquest_images(id, quest_survey_submission_id) MATCH SIMPLE
+    CONSTRAINT images_id_fkey FOREIGN KEY (images_id)
+        REFERENCES public.geoquest_images(id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 );
 
-CREATE OR REPLACE FUNCTION ST_CS6DataToGeoJson()
+CREATE OR REPLACE FUNCTION ST_CSGeoquestDataToGeoJson(quest_id uuid)
 RETURNS jsonb AS
 $BODY$
     SELECT jsonb_build_object(
@@ -70,6 +96,6 @@ $BODY$
         'geometry',   ST_AsGeoJSON(coordinate)::jsonb,
         'properties', to_jsonb(row) - 'id' - 'coordinate' - 'name'
       ) AS feature
-      FROM (SELECT * FROM public.geoquest_submissions) row) features;
+      FROM (SELECT * FROM public.geoquest_submissions where quest_id = $1) row) features;
 $BODY$
 LANGUAGE SQL;
