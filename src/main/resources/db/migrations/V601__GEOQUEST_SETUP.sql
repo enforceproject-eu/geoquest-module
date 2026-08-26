@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS public.geoquest_submissions
     user_name character varying(255),
     assigned_score int,
     image_count int,
+    derived_by int,
+    derives int,
     CONSTRAINT geoquest_submissions_pkey PRIMARY KEY (id)
 );
 

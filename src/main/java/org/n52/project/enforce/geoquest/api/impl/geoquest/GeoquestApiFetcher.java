@@ -139,7 +139,16 @@ public class GeoquestApiFetcher {
     }
 
     private void checkForUpdates() throws Exception {
-        utils.getSubmissions(UUID.fromString("3a1cacf7-c7a0-de86-e915-7c1e3b25f5cf"));
+        for (JsonNode jsonNode : questMapping) {
+            try {
+                String name = jsonNode.get("name").asText();
+                String id = jsonNode.get("quest_id").asText();
+                utils.getUpdates(UUID.fromString(id));
+                LOG.info("Fetched output for " + name);
+            } catch (Exception e) {
+                LOG.error(e.getMessage());
+            }
+        }
         LOG.info("Fetched output.");
     }
 

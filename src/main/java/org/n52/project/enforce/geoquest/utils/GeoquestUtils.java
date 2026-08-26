@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -112,31 +113,30 @@ public class GeoquestUtils {
         }
     }
 
-    private GeoquestSubmissions createSubmissions(JsonNode input) {
+    public void getUpdates(UUID questId) throws ApiException {
+        IIASAGeoQuestQuestQuestSurveySubmissions subs =
+                questSurveySubmissionApi.apiQuestsQuestIdSubmissionGet(questId, null, null, null);
+        List<IIASAGeoQuestQuestQuestSurveySubmissionDto> subslist = subs.getSubmissions();
 
-        GeoquestSubmissions data = new GeoquestSubmissions();
-        data.setQuestSurveySubmissionId(UUID.fromString(input.get("id").asText()));
-        String submissonDataString = input.get("submissionData").asText().replace("\\\"", "\"");
-        JsonNode submissionDataJson;
-        data.setCoordinate(createPoint(input.get("location")));
-        try {
-            submissionDataJson = objectMapper.reader().readTree(submissonDataString);
-        } catch (JsonProcessingException e) {
-            LOG.error(e.getMessage());
-            return data;
+        for (IIASAGeoQuestQuestQuestSurveySubmissionDto iiasaGeoQuestQuestQuestSurveySubmissionDto : subslist) {
+            createUpdates(questId, iiasaGeoQuestQuestQuestSurveySubmissionDto);
         }
-        JsonNode date = submissionDataJson.get("dateSurveyCreation");
-        data.setCreationTime(LocalDateTime.from(formatter.parse(date.asText())));
-        JsonNode reportType = submissionDataJson.get("selectType");
-        if (reportType instanceof ArrayNode) {
-            data.setReportType(((ArrayNode) reportType).elements().next().asText());
-        } else {
-            data.setReportType(reportType.asText());
-        }
-        data.setSubmissionData(submissonDataString);
-        data = geoquestSubmissionsRepository.saveAndFlush(data);
-        LOG.info("Added submission with query id: " + data.getQuestSurveySubmissionId());
-        return data;
+        
+    }
+
+    private void createUpdates(UUID questId,
+            IIASAGeoQuestQuestQuestSurveySubmissionDto input) {
+        UUID submissionId = input.getId();
+        Optional<GeoquestSubmissions> submissionFromDb = geoquestSubmissionsRepository.searchBySubmissionId(submissionId);
+        GeoquestSubmissions updatedSubmission = createSubmissions(questId, input);
+        if(submissionFromDb.isPresent()) {
+            //create new submission and set derives/derived_by properties
+            GeoquestSubmissions currentsSubmission = submissionFromDb.get();
+            updatedSubmission.setDerives(currentsSubmission.getId());
+            currentsSubmission.setDerivedBy(updatedSubmission.getId());
+            geoquestSubmissionsRepository.save(currentsSubmission);
+        } 
+        geoquestSubmissionsRepository.saveAndFlush(updatedSubmission);        
     }
 
     private GeoquestSubmissions createSubmissions(UUID questId,

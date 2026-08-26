@@ -70,6 +70,14 @@ public class GeoquestSubmissions {
     private Integer imageCount;
     
     @Column(
+            name = "derived_by")
+    private Integer derivedBy;
+    
+    @Column(
+            name = "derives")
+    private Integer derives;
+    
+    @Column(
             name = "report_type")
     private String reportType;
     
@@ -237,6 +245,22 @@ public class GeoquestSubmissions {
 
     public void setImages(Set<GeoquestImages> images) {
         this.images = images;
+    }
+
+    public Integer getDerivedBy() {
+        return derivedBy;
+    }
+
+    public void setDerivedBy(Integer derivedBy) {
+        this.derivedBy = derivedBy;
+    }
+
+    public Integer getDerives() {
+        return derives;
+    }
+
+    public void setDerives(Integer derives) {
+        this.derives = derives;
     }
 
     @Override
