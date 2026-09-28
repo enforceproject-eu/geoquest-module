@@ -18,7 +18,7 @@ import org.springframework.data.repository.query.Param;
 public interface GeoquestSubmissionsRepository extends JpaRepository<GeoquestSubmissions, Integer> {
     
     
-    @Query("select d from GeoquestSubmissions as d where d.questSurveySubmissionId  = :submissionId")
+    @Query("select d from GeoquestSubmissions as d where d.questSurveySubmissionId = :submissionId AND d.derivedBy IS NULL")
     Optional<GeoquestSubmissions> searchBySubmissionId(@Param("submissionId") UUID submissionId);
     
     /**

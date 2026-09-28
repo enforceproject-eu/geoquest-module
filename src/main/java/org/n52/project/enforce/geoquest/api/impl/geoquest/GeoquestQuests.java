@@ -23,6 +23,8 @@ public class GeoquestQuests {
             name = "case_study_number")
     private int caseStudyNumber;   
 
+    public GeoquestQuests() { }
+    
     public GeoquestQuests(UUID id, String name, int caseStudyNumber) {
         this.id = id;
         this.name = name;
