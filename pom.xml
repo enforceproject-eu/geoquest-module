@@ -6,7 +6,7 @@
 	<artifactId>geoquest-module</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>	
-        <openapi-codegen.version>7.13.0</openapi-codegen.version>
+        <openapi-codegen.version>7.25.0</openapi-codegen.version>
 		<openapi-spec>/src/main/resources/specs/data-management/enforce_geoquest_dataAccessAPI.yaml</openapi-spec>
         <org.springframework.boot.version>4.1.0</org.springframework.boot.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" sizes="192x192" href="https://join-enforce.eu/storage/2025/03/favicon-192.png">
-<title>ENFORCE CS2 Data</title>
+<title>ENFORCE CS6 Data</title>
 
 <script src="https://unpkg.com/rxjs@^7/dist/bundles/rxjs.umd.min.js"></script>
 
@@ -47,7 +47,7 @@ img.half {
 
         const MAX_FEATURE_COUNT = 1000;
         const MAP_CRS = 'EPSG:4326';
-        const GEOSERVER_URL = '/geoquest_geoquest_data';
+        const GEOSERVER_URL = '/geoquest_data';
 		   
         class Map {
 
@@ -93,6 +93,7 @@ img.half {
                 const params = new URLSearchParams({
                     limit: `${MAX_FEATURE_COUNT}`,  // note: maxFeatures with WFS 1.1 and earlier
                     outputFormat: 'application/json',
+                    questId: '3a1a76af-c26e-5eb9-8af0-f79302af9ccc',
                 });
 
                 const response = await fetch(`${GEOSERVER_URL}?${params}`);
@@ -105,7 +106,7 @@ img.half {
                 this.featureLayer = L.geoJSON(features, {
                     onEachFeature: (feature, layer) => {
                         var content = "<h1>Incident: " + feature.properties.report_type + "</h1></br>";
-        			    content = content.concat("<h2>Observed at: " + feature.properties.date + "<h2/>" + "</br>");
+        			    content = content.concat("<h2>Observed at: " + feature.properties.creation_time + "<h2/>" + "</br>");
                         var customPopup = content;
 					    layer.bindPopup(customPopup);
                     }
@@ -126,7 +127,7 @@ img.half {
 		<div class="header"
 			style="height: 102px; overflow: visible; top: 0px;"></div>
 	</header>
-	<h1>ENFORCE CS2 Data</h1>
+	<h1>ENFORCE CS6 Data</h1>
 	<div id="map"></div>
 </body>
 </html>

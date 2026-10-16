@@ -10,11 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.annotation.Generated;
 
 @Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-06-10T11:28:56.483012800+02:00[Europe/Berlin]", comments = "Generator version: 7.13.0")
 @Controller
 @RequestMapping("${openapi.eNFORCEDataAccess.base-path:}")
+@SecurityRequirement(name = "basicAuth")
 public class GeoquestApiController implements GeoquestApi {
 
     private GeoquestUtils geoquestUtils;
@@ -28,17 +30,7 @@ public class GeoquestApiController implements GeoquestApi {
     }
 
     @Override
-    public ResponseEntity<Serializable> addGeoquestGeoQuestDataAsBody(String body) {
-//        try {
-//            geoquestUtils.readCsvFile(new ByteArrayInputStream(body.getBytes()));
-//        } catch (IOException e) {
-//            return ResponseEntity.internalServerError().body(e.getMessage());
-//        }
-        return ResponseEntity.noContent().build();
-    }
-
-    @Override
-    public ResponseEntity<Serializable> getGeoquestGeoQuestData(UUID questId) {
+    public ResponseEntity<Serializable> getGeoQuestData(UUID questId) {
         try {
             return ResponseEntity.ok(geoquestDataRepository.getGeoJson(questId));
         } catch (Exception e) {

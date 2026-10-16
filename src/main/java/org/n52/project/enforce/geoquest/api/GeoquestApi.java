@@ -5,79 +5,43 @@
  */
 package org.n52.project.enforce.geoquest.api;
 
-import java.util.UUID;
-
 import org.n52.project.enforce.geoquest.model.Error;
 import org.n52.project.enforce.geoquest.model.FeatureCollection;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-
+import java.util.UUID;
+import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Generated;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.multipart.MultipartFile;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-08-26T14:47:08.085497800+02:00[Europe/Berlin]", comments = "Generator version: 7.13.0")
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import jakarta.annotation.Generated;
+
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-09-28T13:25:30.471393600+02:00[Europe/Berlin]", comments = "Generator version: 7.13.0")
 @Validated
-@Tag(name = "geoquest", description = "the geoquest API")
+@Tag(name = "token", description = "the geoquest API")
 public interface GeoquestApi {
 
     /**
-     * POST /geoquest_geoquest_data : Add GeoQuest data
-     * Add GeoQuest data
-     *
-     * @param body feature data (required)
-     * @return Created (status code 201)
-     *         or API key is missing or invalid (status code 401)
-     *         or Forbidden (status code 403)
-     *         or Not Found (status code 404)
-     *         or Invalid input (status code 405)
-     */
-    @Operation(
-        operationId = "addGeoquestGeoQuestDataAsBody",
-        summary = "Add GeoQuest data",
-        description = "Add GeoQuest data",
-        tags = { "geoquest" },
-        responses = {
-            @ApiResponse(responseCode = "201", description = "Created"),
-            @ApiResponse(responseCode = "401", description = "API key is missing or invalid", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Error.class))
-            }),
-            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Error.class))
-            }),
-            @ApiResponse(responseCode = "404", description = "Not Found", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Error.class))
-            }),
-            @ApiResponse(responseCode = "405", description = "Invalid input", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Error.class))
-            })
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.POST,
-        value = "/geoquest_geoquest_data",
-        produces = { "application/json" },
-        consumes = { "application/enforce-geoquest-geoquest-data" }
-    )
-    
-    ResponseEntity<?> addGeoquestGeoQuestDataAsBody(
-        @Parameter(name = "body", description = "feature data", required = true) @Valid @RequestBody String body
-    );
-
-
-    /**
-     * GET /geoquest_geoquest_data : get data gathered by the GeoQuest app
+     * GET /geoquest_data : get data gathered by the GeoQuest app
      * get data gathered by the GeoQuest app
      *
      * @param questId Quest id (required)
@@ -91,7 +55,7 @@ public interface GeoquestApi {
         operationId = "getGeoquestGeoQuestData",
         summary = "get data gathered by the GeoQuest app",
         description = "get data gathered by the GeoQuest app",
-        tags = { "geoquest" },
+        tags = { "token" },
         responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
                 @Content(mediaType = "application/vnd.geo+json", schema = @Schema(implementation = FeatureCollection.class)),
@@ -117,11 +81,11 @@ public interface GeoquestApi {
     )
     @RequestMapping(
         method = RequestMethod.GET,
-        value = "/geoquest_geoquest_data",
+        value = "/geoquest_data",
         produces = { "application/vnd.geo+json", "application/json" }
     )
     
-    ResponseEntity<?> getGeoquestGeoQuestData(
+    ResponseEntity<?> getGeoQuestData(
         @NotNull @Parameter(name = "questId", description = "Quest id", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "questId", required = true) UUID questId
     );
 

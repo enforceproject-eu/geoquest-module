@@ -27,7 +27,7 @@ public class TokenApiController implements TokenApi {
     }
     
     @Override
-    public ResponseEntity<?> addGeoquestGeoQuestTokenAsBody(@Valid TokenPostRequest tokenPostRequest) {
+    public ResponseEntity<?> addGeoQuestTokenAsBody(@Valid TokenPostRequest tokenPostRequest) {
         Token.setToken(tokenPostRequest.getToken());
         geoquestUtils.getApiClient().setAccessToken(Token.getToken());
         try {

@@ -11,18 +11,19 @@ info:
 servers:
   - url: https://enforce.dev.52north.org/
 tags:
+  - name: pet
   - name: access-control
     description: the AccessControl API
   - name: database-public
     description: the public Database API
 paths:
-  /geoquest_geoquest_data:
+  /geoquest_data:
     get:
       tags:
         - geoquest
       summary: get data gathered by the GeoQuest app 
       description:  get data gathered by the GeoQuest app 
-      operationId: getGeoquestGeoQuestData
+      operationId: getGeoQuestData
       parameters:
         - name: questId
           in: query
@@ -62,54 +63,13 @@ paths:
             application/json:
               schema:
                   $ref: '#/components/schemas/Error'
-    post:
-      tags:
-        - geoquest
-      summary: Add GeoQuest data
-      description: Add GeoQuest data 
-      operationId: addGeoquestGeoQuestDataAsBody
-      requestBody:
-        description: feature data
-        content:
-          application/enforce-geoquest-geoquest-data:
-              schema:
-                 type: string
-                 format: csv
-        required: true
-      responses:
-        "201":
-          description: Created
-        "401":
-          description: API key is missing or invalid
-          content:
-            application/json:
-              schema:
-                  $ref: '#/components/schemas/Error'
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                  $ref: '#/components/schemas/Error'
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                  $ref: '#/components/schemas/Error'
-        "405":
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                  $ref: '#/components/schemas/Error'
   /token:
     post:
       tags:
         - token
       summary: Add GeoQuest token
       description: Add GeoQuest token 
-      operationId: addGeoquestGeoQuestTokenAsBody
+      operationId: addGeoQuestTokenAsBody
       requestBody:
         description: token
         content:
