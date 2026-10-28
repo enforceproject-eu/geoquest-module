@@ -37,7 +37,7 @@ import jakarta.annotation.Generated;
 
 @Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-09-28T13:25:30.471393600+02:00[Europe/Berlin]", comments = "Generator version: 7.13.0")
 @Validated
-@Tag(name = "token", description = "the geoquest API")
+@Tag(name = "geoquest", description = "the geoquest API")
 public interface GeoquestApi {
 
     /**
@@ -55,7 +55,7 @@ public interface GeoquestApi {
         operationId = "getGeoquestGeoQuestData",
         summary = "get data gathered by the GeoQuest app",
         description = "get data gathered by the GeoQuest app",
-        tags = { "token" },
+        tags = { "geoquest" },
         responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
                 @Content(mediaType = "application/vnd.geo+json", schema = @Schema(implementation = FeatureCollection.class)),

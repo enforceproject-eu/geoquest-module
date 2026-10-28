@@ -6,14 +6,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
-import org.n52.project.enforce.geoquest.api.impl.geoquest.SubmissionsMapper;
 import org.n52.project.enforce.geoquest.remote.ApiClient;
 import org.n52.project.enforce.geoquest.remote.ApiException;
 import org.n52.project.enforce.geoquest.remote.api.QuestApi;
 import org.n52.project.enforce.geoquest.remote.api.QuestSurveySubmissionApi;
 import org.n52.project.enforce.geoquest.remote.model.IIASAGeoQuestQuestQuestSurveySubmissionDto;
 import org.n52.project.enforce.geoquest.remote.model.IIASAGeoQuestQuestQuestSurveySubmissions;
-import org.n52.project.enforce.geoquest.utils.ProvenanceResponseFilter;
 import org.n52.project.enforce.geoquest.utils.ProvenanceService;
 import org.n52.project.enforce.geoquest.utils.ResponseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,12 +59,12 @@ public class ApiTest {
             
             List<IIASAGeoQuestQuestQuestSurveySubmissionDto> subslist = subs.getSubmissions();
             
-            for (IIASAGeoQuestQuestQuestSurveySubmissionDto iiasaGeoQuestQuestQuestSurveySubmissionDto : subslist) {
-                SubmissionsMapper.INSTANCE.toDb(iiasaGeoQuestQuestQuestSurveySubmissionDto);
-                System.out.println(iiasaGeoQuestQuestQuestSurveySubmissionDto.getImageCount());
-                System.out.println(iiasaGeoQuestQuestQuestSurveySubmissionDto.getUserName());
-                System.out.println(iiasaGeoQuestQuestQuestSurveySubmissionDto.getSubmissionData());
-            }
+//            for (IIASAGeoQuestQuestQuestSurveySubmissionDto iiasaGeoQuestQuestQuestSurveySubmissionDto : subslist) {
+//                SubmissionsMapper.INSTANCE.toDb(iiasaGeoQuestQuestQuestSurveySubmissionDto);
+//                System.out.println(iiasaGeoQuestQuestQuestSurveySubmissionDto.getImageCount());
+//                System.out.println(iiasaGeoQuestQuestQuestSurveySubmissionDto.getUserName());
+//                System.out.println(iiasaGeoQuestQuestQuestSurveySubmissionDto.getSubmissionData());
+//            }
             
         } catch (ApiException e) {
             // TODO Auto-generated catch block
@@ -86,7 +84,7 @@ public class ApiTest {
        
         ApiClient client = new ApiClient().setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"));
         
-        client.getHttpClient().register(ProvenanceResponseFilter.class);
+//        client.getHttpClient().register(ProvenanceResponseFilter.class);
         client.getHttpClient().register(ResponseInterceptor.class);
         
         client.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"));
