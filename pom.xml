@@ -12,6 +12,8 @@
 	<properties>
 		<openapi-spec>/src/main/resources/specs/data-management/enforce_geoquest_dataAccessAPI.yaml</openapi-spec>
 		<base-package>org.n52.project.enforce.geoquest</base-package>
+		<remote.package>org.n52.project.enforce.geoquest.remote</remote.package>
+		<input.spec>https://geoqapi.main.geo-wiki.org/swagger/v1/swagger.json</input.spec>
 		<argLine/>
 	</properties>
 
