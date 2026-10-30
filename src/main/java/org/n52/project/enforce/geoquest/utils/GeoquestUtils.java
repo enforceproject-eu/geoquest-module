@@ -280,7 +280,7 @@ public class GeoquestUtils {
                 IIASAGeoQuestQuestCoordinate firstLocation = location.get(0);
                 Double lat = firstLocation.getYLat();
                 Double lng = firstLocation.getXLng();
-                return geometryFactory.createPoint(new Coordinate(lat, lng));
+                return geometryFactory.createPoint(new Coordinate(lng, lat));
             }
         }
         return geometryFactory.createPoint(new Coordinate(0, 0));
