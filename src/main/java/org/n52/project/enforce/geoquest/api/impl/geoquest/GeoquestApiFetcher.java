@@ -62,12 +62,15 @@ public class GeoquestApiFetcher {
     public GeoquestApiFetcher(GeoquestSubmissionsRepository dataRepository, GeoquestUtils utils,
             Environment environment) {
 
+        LOG.debug("GeoquestApiFetcher constructor");
+        
         this.mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         this.utils = utils;
         urlSpec = environment.getProperty("geoquest.url.spec");
         initialize = Boolean.parseBoolean(environment.getProperty("geoquest.db.initialize"));
         String questMappingString = environment.getProperty("geoquest.quests.mapping");
+        LOG.debug(questMappingString);
         try {
             questMapping = (ArrayNode) mapper.readTree(questMappingString);
         } catch (JsonProcessingException e) {
