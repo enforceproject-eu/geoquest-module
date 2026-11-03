@@ -27,7 +27,7 @@ public class ProvenanceService {
         dataDir = environment.getProperty("data.dir");
     }
 
-    public boolean storeInitialData(InputStream dataStream) throws IOException, NoSuchAlgorithmException {
+    public ProvenanceEntry storeInitialData(InputStream dataStream) throws IOException, NoSuchAlgorithmException {
         UUID uuid = UUID.randomUUID();
         File dataDirectory = new File(dataDir + "/" + System.currentTimeMillis());
         dataDirectory.mkdir();
@@ -41,12 +41,13 @@ public class ProvenanceService {
             }
         } catch (IOException e) {
             // handle exception
-            return false;
+            return null;
         }
         byte[] data = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
         byte[] hash = MessageDigest.getInstance("MD5").digest(data);
         String checksum = new BigInteger(1, hash).toString(16);
-        return true;
+        ProvenanceEntry result = new ProvenanceEntry(data, checksum);
+        return result;
     }
     
 }

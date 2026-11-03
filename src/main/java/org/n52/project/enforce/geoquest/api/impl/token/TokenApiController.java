@@ -33,7 +33,9 @@ public class TokenApiController implements TokenApi {
         try {
             geoquestApiFetcher.checkForUpdates();
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("Exception while trying to get updates from GeoQuest API.");
+            return ResponseEntity.internalServerError().body(stringBuilder.toString());
         }
         return ResponseEntity.ok().build();
     }

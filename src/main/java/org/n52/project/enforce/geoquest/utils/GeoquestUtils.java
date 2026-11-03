@@ -47,6 +47,8 @@ public class GeoquestUtils {
     private GeoquestSubmissionsRepository geoquestSubmissionsRepository;
 
     private GeoquestImagesRepository geoquestImagesRepository;
+    
+    private ProvenanceService provenanceService;
 
     private WKTReader wktReader;
 
@@ -69,20 +71,25 @@ public class GeoquestUtils {
     private static Logger LOG = LoggerFactory.getLogger(GeoquestUtils.class);
 
     public GeoquestUtils(GeoquestSubmissionsRepository geoquestSubmissionsRepository,
-            GeoquestImagesRepository geoquestImagesRepository, Environment environment) {
+            GeoquestImagesRepository geoquestImagesRepository, Environment environment, ProvenanceService provenanceService) {
         this.geoquestSubmissionsRepository = geoquestSubmissionsRepository;
         this.geoquestImagesRepository = geoquestImagesRepository;
         wktReader = new WKTReader(geometryFactory);
         objectMapper = new ObjectMapper();
         apiClient = new ApiClient();
-        apiClient.getHttpClient().register(ResponseInterceptor.class);
         apiClient.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"));
+        String basePath = null;
         try {
-            apiClient.setBasePath(environment.getProperty("geoquest.basepath"));
+            basePath = environment.getProperty("geoquest.basepath");
+            apiClient.setBasePath(basePath);
         } catch (Exception e) {
             // TODO: handle exception
+            LOG.error("Could not set API base path: " + basePath);
         }
         questSurveySubmissionApi = new QuestSurveySubmissionApi(apiClient);
+        ResponseInterceptor responseFilter = new ResponseInterceptor();
+        apiClient.getHttpClient().register(responseFilter);
+        responseFilter.setProvenanceService(provenanceService);
     }
 
     public HttpClient getHttpClient() {
