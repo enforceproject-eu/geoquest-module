@@ -3,6 +3,8 @@ package org.n52.project.enforce.geoquest.api.impl;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * <p>
@@ -13,8 +15,9 @@ import org.springframework.boot.persistence.autoconfigure.EntityScan;
  * @since 1.0.0
  */
 @SpringBootApplication
-@EntityScan(basePackages = {
-"org.n52.project.enforce.geoquest.api.impl.geoquest*"})
+@EntityScan(basePackages = {"org.n52.project.enforce.**"})
+@EnableJpaRepositories(basePackages = {"org.n52.project.enforce.**"})
+@ComponentScan(basePackages = {"org.n52.project.enforce.**"})
 public class Application {
 
     /**

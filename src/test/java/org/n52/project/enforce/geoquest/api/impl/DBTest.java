@@ -17,7 +17,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureTestDatabase(
         replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = Application.class)
-@ComponentScan(basePackageClasses = { GeoquestUtils.class, GeoquestApiFetcher.class})
+//@ComponentScan(basePackageClasses = { GeoquestUtils.class, GeoquestApiFetcher.class})
+@ComponentScan(basePackages = {"org.n52.project.enforce.**"})
 public abstract class DBTest {
 
     static JdbcDatabaseContainer<?> database = new PostgisContainerProvider().newInstance()
