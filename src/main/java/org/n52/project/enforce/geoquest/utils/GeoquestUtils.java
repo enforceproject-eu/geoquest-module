@@ -48,6 +48,8 @@ import org.n52.project.enforce.cdm.CommonDataModel;
 import org.n52.project.enforce.cdm.CommonDataModelRepository;
 import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestImages;
 import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestImagesRepository;
+import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestQuests;
+import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestQuestsRepository;
 import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestSubmissions;
 import org.n52.project.enforce.geoquest.api.impl.geoquest.GeoquestSubmissionsRepository;
 import org.n52.project.enforce.geoquest.remote.ApiClient;
@@ -75,6 +77,8 @@ public class GeoquestUtils {
     private GeoquestSubmissionsRepository geoquestSubmissionsRepository;
 
     private GeoquestImagesRepository geoquestImagesRepository;
+    
+    private GeoquestQuestsRepository geoquestQuestsRepository;
     
     private CdmValidationStatusRepository cdmValidationStatusRepository;
     
@@ -115,14 +119,16 @@ public class GeoquestUtils {
     private static Logger LOG = LoggerFactory.getLogger(GeoquestUtils.class);
 
     public GeoquestUtils(GeoquestSubmissionsRepository geoquestSubmissionsRepository,
-            GeoquestImagesRepository geoquestImagesRepository, Environment environment, ProvenanceService provenanceService,
-            CdmValidationStatusRepository cdmValidationStatusRepository, CommonDataModelRepository commonDataModelRepository,
+            GeoquestQuestsRepository geoquestQuestsRepository, GeoquestImagesRepository geoquestImagesRepository,
+            Environment environment, ProvenanceService provenanceService,
+            CdmValidationStatusRepository cdmValidationStatusRepository,
+            CommonDataModelRepository commonDataModelRepository,
             CdmObservationTypeRepository cdmObservationTypeRepository,
-            CdmRegulatoryDomainRepository cdmRegulatoryDomainRepository,
-            CdmCategoryRepository cdmCategoryRepository,
+            CdmRegulatoryDomainRepository cdmRegulatoryDomainRepository, CdmCategoryRepository cdmCategoryRepository,
             CdmEvidenceTypeRepository cdmEvidenceTypeRepository) {
         this.geoquestSubmissionsRepository = geoquestSubmissionsRepository;
         this.geoquestImagesRepository = geoquestImagesRepository;
+        this.geoquestQuestsRepository = geoquestQuestsRepository;
         this.cdmValidationStatusRepository = cdmValidationStatusRepository;
         this.cdmObservationTypeRepository = cdmObservationTypeRepository;
         this.cdmRegulatoryDomainRepository = cdmRegulatoryDomainRepository;
@@ -151,6 +157,7 @@ public class GeoquestUtils {
         LOG.debug(questMappingString);
         try {
             questMapping = (ArrayNode) objectMapper.readTree(questMappingString);
+            checkForNewQuests(questMapping);
         } catch (JsonProcessingException e) {
             LOG.error(e.getMessage());
             return;
@@ -422,8 +429,7 @@ public class GeoquestUtils {
             if(questId.toString().equals(jsonNode.get("quest_id").asText())) {
                 caseStudyId = jsonNode.get("case_study").asInt();
             }
-        }
-        
+        }        
         
         Object submissionDataObj = input.getSubmissionData();
         String submissionDataString = "";
@@ -587,7 +593,8 @@ public class GeoquestUtils {
         switch (contentType) {
         case MimeTypeUtils.IMAGE_JPEG_VALUE:
         case MimeTypeUtils.IMAGE_PNG_VALUE:
-        case MimeTypeUtils.IMAGE_GIF_VALUE: {
+        case MimeTypeUtils.IMAGE_GIF_VALUE:
+        case "image/jpg": {
             evidenceType = "photo";
             break;
         }
@@ -631,6 +638,23 @@ public class GeoquestUtils {
             }
         }
         return contentType;
+    }
+
+    private void checkForNewQuests(ArrayNode questMapping) {
+        for (JsonNode jsonNode : questMapping) {
+            String questId = jsonNode.get("quest_id").asText();
+            UUID questUuid = UUID.fromString(questId);
+            Optional<GeoquestQuests> questFromDb = geoquestQuestsRepository.findById(questUuid);
+            if(questFromDb.isEmpty()) {
+                //create new quest in db
+                String name = jsonNode.get("name").asText();
+                int caseStudyId = jsonNode.get("case_study").asInt();
+                GeoquestQuests geoquestQuest = new GeoquestQuests(questUuid, name, caseStudyId);
+                geoquestQuestsRepository.saveAndFlush(geoquestQuest);
+                LOG.info("New Quest created in database: " + questId);
+            }
+        }
+        
     }
 
 }
