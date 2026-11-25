@@ -1,6 +1,7 @@
 package org.n52.project.enforce.geoquest.utils;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,11 +21,10 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -33,7 +33,6 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.project.enforce.cdm.CdmCategory;
 import org.n52.project.enforce.cdm.CdmCategoryRepository;
@@ -59,6 +58,19 @@ import org.n52.project.enforce.geoquest.remote.model.IIASAGeoQuestQuestCoordinat
 import org.n52.project.enforce.geoquest.remote.model.IIASAGeoQuestQuestImageDto;
 import org.n52.project.enforce.geoquest.remote.model.IIASAGeoQuestQuestQuestSurveySubmissionDto;
 import org.n52.project.enforce.geoquest.remote.model.IIASAGeoQuestQuestQuestSurveySubmissions;
+import org.openprovenance.prov.interop.InteropFramework;
+import org.openprovenance.prov.model.Activity;
+import org.openprovenance.prov.model.Agent;
+import org.openprovenance.prov.model.Document;
+import org.openprovenance.prov.model.Entity;
+import org.openprovenance.prov.model.Namespace;
+import org.openprovenance.prov.model.ProvFactory;
+import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.StatementOrBundle;
+import org.openprovenance.prov.model.WasAttributedTo;
+import org.openprovenance.prov.model.WasDerivedFrom;
+import org.openprovenance.prov.model.WasGeneratedBy;
+import org.openprovenance.prov.model.interop.Formats.ProvFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -94,13 +106,9 @@ public class GeoquestUtils {
     
     private ProvenanceService provenanceService;
 
-    private WKTReader wktReader;
-
     private ObjectMapper objectMapper;
 
     DateFormat dateFormat = new SimpleDateFormat("yyy-MM-dd'T'HH:MM:SS");
-
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS", Locale.ENGLISH);
 
     ZoneId zoneIdEuropeRome = ZoneId.of("Europe/Rome");
 
@@ -115,7 +123,17 @@ public class GeoquestUtils {
     private ArrayNode questMapping;
 
     private String dataDir;
+    
+    private final ProvFactory pFactory;
+    
+    private final Namespace ns;
 
+    public static final String ENFORCE_NS = "http://join-enforce.eu";
+    public static final String ENFORCE_PREFIX = "enforce";
+    
+    public static final String GEOQUEST_PREFIX = "geoquest";
+    public static final String GEOQUEST_NS = "https://geoquest.iiasa.ac.at/";
+    
     private static Logger LOG = LoggerFactory.getLogger(GeoquestUtils.class);
 
     public GeoquestUtils(GeoquestSubmissionsRepository geoquestSubmissionsRepository,
@@ -135,12 +153,14 @@ public class GeoquestUtils {
         this.cdmCategoryRepository = cdmCategoryRepository;
         this.cdmEvidenceTypeRepository = cdmEvidenceTypeRepository;
         this.commonDataModelRepository = commonDataModelRepository;
-        wktReader = new WKTReader(geometryFactory);
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         apiClient = new ApiClient();
         apiClient.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"));
         dataDir = environment.getProperty("data.dir");
+        if(dataDir == null || dataDir.isEmpty()) {
+            dataDir = System.getProperty("java.io.tmpdir");
+        }
         String basePath = null;
         try {
             basePath = environment.getProperty("geoquest.basepath");
@@ -155,6 +175,11 @@ public class GeoquestUtils {
         responseFilter.setProvenanceService(provenanceService);
         String questMappingString = environment.getProperty("geoquest.quests.mapping");
         LOG.debug(questMappingString);
+        pFactory = InteropFramework.getDefaultFactory();
+        ns=new Namespace();
+        ns.addKnownNamespaces();
+        ns.register(ENFORCE_PREFIX, ENFORCE_NS);
+        ns.register(GEOQUEST_PREFIX, GEOQUEST_NS);
         try {
             questMapping = (ArrayNode) objectMapper.readTree(questMappingString);
             checkForNewQuests(questMapping);
@@ -389,7 +414,7 @@ public class GeoquestUtils {
         String observationId = input.getId().toString();
         OffsetDateTime observationTime = fromLocalDateTime(input.getCreationTime());
         String originalEvidenceHash = null;
-        String originalRecordId;
+        String originalRecordId = observationId;
         Boolean personalDataFlag = false;
         String processingActivityRef;
         String protocolId;
@@ -455,6 +480,9 @@ public class GeoquestUtils {
         }        
 
         if (reportTypeString != null && !reportTypeString.isEmpty()) {
+            
+            reportTypeString = createCorrectType(reportTypeString);
+            
             CdmObservationType observationType = cdmObservationTypeRepository.findByName(reportTypeString);
             if(observationType != null) {
                 observationTypeId = observationType.getId();
@@ -573,6 +601,10 @@ public class GeoquestUtils {
             }
         }
         
+        Document provDoc = makeDocument(originalRecordId, contributorId, campaignId);
+        InteropFramework intF=new InteropFramework();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        intF.writeDocument(byteArrayOutputStream, provDoc, ProvFormat.JSONLD);
         CommonDataModel dataModel = new CommonDataModel(caseStudyId, createdAt, modifiedAt, observationId, observationTime, personalDataFlag, recordVersion, submissionTime, observationTypeId, observedPropertyId, collectionMethodId, validationStatusId, accessLevelId, licenceId);
         dataModel.setSensitiveContentFlagId(sensitiveContentFlagId);
         dataModel.setCampaignId(campaignId);
@@ -583,6 +615,7 @@ public class GeoquestUtils {
         dataModel.setEvidenceId(evidenceId);
         dataModel.setOriginalEvidenceHash(originalEvidenceHash);
         dataModel.setEvidenceTypeId(evidenceTypeId);
+        dataModel.setProvenanceRecord(byteArrayOutputStream.toString());
         commonDataModelRepository.saveAndFlush(dataModel);
     }
     
@@ -655,6 +688,36 @@ public class GeoquestUtils {
             }
         }
         
+    }
+    
+    public Document makeDocument(String title, String agent, String project) {     
+        
+        Entity entity = pFactory.newEntity(qn(title));
+        entity.setValue(pFactory.newValue(title,
+                                         pFactory.getName().XSD_STRING));
+     
+        Agent agentAgent = pFactory.newAgent(qn(agent), agent);
+     
+        WasAttributedTo attr1 = pFactory.newWasAttributedTo(null,
+                                                            entity.getId(),
+                                                            agentAgent.getId());
+     
+        Activity projectActivity = pFactory.newActivity(qn(project));
+        
+        WasGeneratedBy wsgb = pFactory.newWasGeneratedBy(entity, "collected", projectActivity);
+        
+        Document document = pFactory.newDocument();
+        document.getStatementOrBundle()
+                .addAll(Arrays.asList(new StatementOrBundle[] { entity, 
+                                                                agentAgent,
+                                                                attr1}));
+        document.getStatementOrBundle().add(wsgb);
+        document.setNamespace(ns);
+        return document;
+    }
+    
+    public QualifiedName qn(String n) {
+        return ns.qualifiedName(GEOQUEST_PREFIX, n, pFactory);
     }
 
 }

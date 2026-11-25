@@ -44,7 +44,6 @@ public class ResponseInterceptor implements ReaderInterceptor {
             LOG.info("Intercepted");
             context.setInputStream(new ByteArrayInputStream(entry.getData()));
         }
-
         return context.proceed();
     }
 }
